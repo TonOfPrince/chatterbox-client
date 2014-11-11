@@ -84,5 +84,9 @@ form input[type=text] {
 }
 
 .messageList {
-word-wrap:break-word;
+    word-wrap:break-word;
+}
+
+.friend {
+    font-weight: bold;
 }
