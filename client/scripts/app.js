@@ -1,12 +1,15 @@
 // YOUR CODE HERE:
 $(document).ready(function () {
 
+  var currentRoom = 'lobby';
+  var roomList = {};
+
   var getFunc = function() {
 
     $.ajax({
       url: 'https://api.parse.com/1/classes/chatterbox',
       type: 'GET',
-      data: {limit: 20, order: "-createdAt"},
+      data: {limit: 100, order: "-createdAt"},
       contentType: 'application/json',
       success: function (data) {
         messageWriter(data.results);
@@ -25,7 +28,7 @@ $(document).ready(function () {
   var submitFunc = function() {
     var value = $(".userInput").val();
     var user = window.location.search.substring(10);
-    var message = {'username': user, 'text': value, 'roomname':'lobby'};
+    var message = {'username': user, 'text': value, 'roomname': currentRoom};
     console.log(JSON.stringify(message));
     $.ajax({
       url: 'https://api.parse.com/1/classes/chatterbox',
@@ -42,6 +45,35 @@ $(document).ready(function () {
     });
   };
 
+
+  var makeNewRoom = function() {
+    var value = $(".roomInput").val();
+    var lowerVal = value.toLowerCase();
+    if (!roomList[lowerVal]) {
+      roomList[lowerVal] = value;
+      $('.roomList').append("<option value='" + lowerVal + "'>" + value + "</option>");
+    }
+    // else {
+    //   alert('Already a room!');
+    // }
+  };
+
+  var changeRooms = function() {
+    var value = $(".roomList").val();
+    console.log(value);
+    var lowerVal = value.toLowerCase();
+    currentRoom = lowerVal;
+    console.log(currentRoom);
+  };
+
+
+  //room id
+  $("#main").append("<select class='roomList'><option value='lobby'>Lobby</option></select><br><input type='button' class='createRoom'><input type='text' class='roomInput'><br><br>");
+
+  $(".roomList").on('change',changeRooms);
+
+  $(".createRoom").on('click',makeNewRoom);
+
   // create form
   $("#main").append("<input type='text' class='userInput'><input type='button' class='submitMessage'>");
 
@@ -51,16 +83,21 @@ $(document).ready(function () {
   // print out chats
   $("#main").append("<ul class='messageList'></ul>");
 
+
+
   var messageWriter = function(data) {
 
     var chatter = '';
     for (var i = 0; i < data.length; i++) {
-      chatter += "<li>" + encodeURIComponent(data[i].username) + ": " + encodeURIComponent(data[i].text) + "</li>";
+      if (data[i].roomname === currentRoom) {
+
+        chatter += "<li>" + encodeURIComponent(data[i].username) + ": " + encodeURIComponent(data[i].text) + "</li>";
+      }
     }
     $('.messageList').html('');
     $(".messageList").append(chatter);
 
-    console.log(data);
+    console.log();
   };
 
 });
